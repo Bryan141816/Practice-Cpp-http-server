@@ -1,8 +1,0 @@
-E:/CODES/Practice-http/build/CMakeFiles/Server.dir
-E:/CODES/Practice-http/build/CMakeFiles/Experimental.dir
-E:/CODES/Practice-http/build/CMakeFiles/Nightly.dir
-E:/CODES/Practice-http/build/CMakeFiles/Continuous.dir
-E:/CODES/Practice-http/build/CMakeFiles/NightlyMemoryCheck.dir
-E:/CODES/Practice-http/build/CMakeFiles/RUN_TESTS.dir
-E:/CODES/Practice-http/build/CMakeFiles/ALL_BUILD.dir
-E:/CODES/Practice-http/build/CMakeFiles/ZERO_CHECK.dir
