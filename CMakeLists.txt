@@ -4,7 +4,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
-add_executable(Server src/main.cpp src/mimetype_utils.cpp)
+add_executable(Server 
+            src/main.cpp 
+            src/mimetype_utils.cpp
+            src/url_utils.cpp
+            src/http_request.cpp
+            src/http_response.cpp
+)
 
 target_link_libraries(Server PRIVATE Ws2_32)
 include(CTest)
