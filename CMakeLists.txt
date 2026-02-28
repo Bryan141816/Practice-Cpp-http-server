@@ -10,6 +10,8 @@ add_executable(Server
             src/url_utils.cpp
             src/http_request.cpp
             src/http_response.cpp
+            src/file_handler.cpp
+            src/server_handler.cpp
 )
 
 target_link_libraries(Server PRIVATE Ws2_32)
