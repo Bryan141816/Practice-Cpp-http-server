@@ -4,7 +4,7 @@
 std::string HttpResponse::toString() const {
     std::ostringstream out;
 
-    out << "HTTP/1.1 " << (int)status << " " << reasonPhrase(status) << "\r\n";
+    out << "HTTP/1.1 " << (int)status << " " << httpstatus::reasonPhrase(status) << "\r\n";
 
     auto hasHeader = [&](const std::string& key) {
         return headers.find(key) != headers.end();
@@ -60,7 +60,7 @@ bool sendResponse(SOCKET clientSocket, const HttpResponse& resp) {
     return sendAll(clientSocket, raw.c_str(), (int)raw.size());
 }
 
-HttpResponse makeText(HttpStatus st, const std::string& text, const std::string& mime) {
+HttpResponse makeText(httpstatus::HttpStatus st, const std::string& text, const std::string& mime) {
     HttpResponse r;
     r.status = st;
     r.headers["Content-Type"] = mime;
@@ -70,21 +70,21 @@ HttpResponse makeText(HttpStatus st, const std::string& text, const std::string&
 
 HttpResponse redirectTo(const std::string& location) {
     HttpResponse r;
-    r.status = HttpStatus::Found;
+    r.status = httpstatus::HttpStatus::Found;
     r.headers["Location"] = location;
     r.body = "";
     return r;
 }
 
 HttpResponse respondNotFound() {
-    return makeText(HttpStatus::NotFound,
+    return makeText(httpstatus::HttpStatus::NotFound,
         "<html><body><h1>404 Not Found</h1></body></html>",
         "text/html; charset=utf-8"
     );
 }
 
 HttpResponse respondMethodNotAllowed() {
-    HttpResponse r = makeText(HttpStatus::MethodNotAllowed,
+    HttpResponse r = makeText(httpstatus::HttpStatus::MethodNotAllowed,
         "<html><body><h1>405 Method Not Allowed</h1></body></html>",
         "text/html; charset=utf-8"
     );
@@ -93,7 +93,7 @@ HttpResponse respondMethodNotAllowed() {
 }
 
 HttpResponse respondServerError() {
-    return makeText(HttpStatus::InternalServerError,
+    return makeText(httpstatus::HttpStatus::InternalServerError,
         "<html><body><h1>500 Internal Server Error</h1></body></html>",
         "text/html; charset=utf-8"
     );

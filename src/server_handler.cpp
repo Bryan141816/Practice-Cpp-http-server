@@ -68,8 +68,9 @@ bool ServerHandler::start()
     HttpRequest request;
     if (!parseHttpRequest(rawRequest, request))
     {
-      sendResponse(clientSocket, makeText(HttpStatus::BadRequest, "Bad Request\n"));
+      sendResponse(clientSocket, makeText(httpstatus::HttpStatus::BadRequest, "Bad Request\n"));
       closesocket(clientSocket);
+      logger("400", request.path);
       continue;
     }
 
@@ -78,6 +79,7 @@ bool ServerHandler::start()
     {
       sendResponse(clientSocket, respondMethodNotAllowed());
       closesocket(clientSocket);
+      logger("405", request.path);
       continue;
     }
 
@@ -89,6 +91,9 @@ bool ServerHandler::start()
       HttpResponse resp = (*h)(request);
       sendResponse(clientSocket, resp);
       closesocket(clientSocket);
+  
+      std::string stringStatus = httpstatus::toString(resp.status);
+      logger(stringStatus, request.path);
       continue;
     }
 
@@ -96,8 +101,9 @@ bool ServerHandler::start()
     std::string safePath;
     if (!sanitizeWebPath(path, safePath))
     {
-      sendResponse(clientSocket, makeText(HttpStatus::BadRequest, "Bad Request\n"));
+      sendResponse(clientSocket, makeText(httpstatus::HttpStatus::BadRequest, "Bad Request\n"));
       closesocket(clientSocket);
+      logger("400", request.path);
       continue;
     }
 
@@ -107,6 +113,7 @@ bool ServerHandler::start()
     {
       sendResponse(clientSocket, respondNotFound());
       closesocket(clientSocket);
+      logger("404", request.path);
       continue;
     }
 
@@ -115,15 +122,17 @@ bool ServerHandler::start()
     {
       sendResponse(clientSocket, respondServerError());
       closesocket(clientSocket);
+      logger("500", request.path);
       continue;
     }
 
     HttpResponse ok;
-    ok.status = HttpStatus::OK;
+    ok.status = httpstatus::HttpStatus::OK;
     ok.headers["Content-Type"] = getMimeType(filePath.extension().string());
     ok.body = std::move(body);
 
     sendResponse(clientSocket, ok);
+    logger("200", request.path);
     closesocket(clientSocket);
   }
 
@@ -146,4 +155,8 @@ bool ServerHandler::recvUntilHeaders(SOCKET s, std::string &out)
     if (out.find("\r\n\r\n") != std::string::npos)
       return true;
   }
+}
+void ServerHandler::logger(std::string status, std::string &path)
+{
+  std::cout << status << ": " << path << std::endl;
 }

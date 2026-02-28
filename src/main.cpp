@@ -20,6 +20,10 @@ int main()
 
     ServerHandler server(PORT, WORKING_DIR);
     server.addRouter(router);
-    server.start();
-    return 0;
+    if(server.start()){
+        return 0;
+    }
+    else{
+        return 1;
+    }
 }

@@ -24,4 +24,5 @@ private:
 
   static constexpr int bufferSize = 4096;
   static bool recvUntilHeaders(SOCKET s, std::string &out);
+  static void logger(std::string status, std::string &path);
 };
