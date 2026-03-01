@@ -1,5 +1,5 @@
 #pragma once
-
+#include <string>
 namespace httpstatus
 {
 
@@ -36,26 +36,8 @@ namespace httpstatus
       return "Unknown";
     }
   }
-  inline const char *toString(HttpStatus s)
+  inline std::string toString(HttpStatus s)
   {
-    switch (s)
-    {
-    case HttpStatus::OK:
-      return "200";
-    case HttpStatus::Found:
-      return "302";
-    case HttpStatus::BadRequest:
-      return "400";
-    case HttpStatus::NotFound:
-      return "404";
-    case HttpStatus::MethodNotAllowed:
-      return "405";
-    case HttpStatus::InternalServerError:
-      return "500";
-    case HttpStatus::NotImplemented:
-      return "501";
-    default:
-      return "400";
-    }
+    return std::to_string(static_cast<int>(s));
   }
 }

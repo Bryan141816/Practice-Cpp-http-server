@@ -12,7 +12,8 @@
 
 int main()
 {
-    Router router;
+    Router router {"/pages"};
+
     router.get("/", [](const HttpRequest &)
                { return redirectTo("/index.html"); });
     router.get("/cheval", [](const HttpRequest &)
