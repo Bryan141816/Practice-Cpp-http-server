@@ -3,8 +3,11 @@
 #include <unordered_map>
 #include <functional>
 #include <iostream>
+
 struct HttpRequest;
 struct HttpResponse;
+
+// TODO: enable dynamic routes
 
 enum class HttpMethod
 {
@@ -20,6 +23,19 @@ struct Route
   HttpMethod method;
   std::string pathPattern;
   std::function<HttpResponse(const HttpRequest &)> handler;
+};
+
+enum class MatchError
+{
+  None,
+  NotFound,
+  MethodNotAllowed
+};
+
+struct MatchResult
+{
+  const Route *route = nullptr;
+  MatchError error = MatchError::NotFound;
 };
 
 class Router
@@ -40,39 +56,50 @@ public:
   {
     addRoute(HttpMethod::GET, path, std::move(h));
   }
-
-  // returns nullptr if not found
-  const Route *match(HttpMethod method,
-                     const std::string &path) const
+  void post(const std::string &path, Handler h)
   {
+    addRoute(HttpMethod::POST, path, std::move(h));
+  }
+
+  static bool pathMatches(const std::string &pattern, const std::string &path)
+  {
+    if (pattern == path)
+      return true;
+
+    if (!path.empty() && path.back() != '/')
+    {
+      if (pattern == path + "/")
+        return true;
+    }
+    if (path.size() > 1 && path.back() == '/')
+    {
+      std::string without = path;
+      without.pop_back();
+      if (pattern == without)
+        return true;
+    }
+    return false;
+  }
+
+  MatchResult match(HttpMethod method, const std::string &path) const
+  {
+    bool pathFound = false;
 
     for (const auto &route : routes_)
     {
+      if (!pathMatches(route.pathPattern, path))
+        continue;
+
+      pathFound = true;
 
       if (route.method == method)
-      {
-        if (route.pathPattern == path)
-        {
-          return &route;
-        }
-        if (!path.empty() && path.back() != '/')
-        {
-          std::string withSlash = path + "/";
-          if (route.pathPattern == withSlash)
-            return &route;
-        }
-        if (path.size() > 1 && path.back() == '/')
-        {
-          std::string withoutSlash = path;
-          withoutSlash.pop_back();
-
-          std::cout << (route.pathPattern == withoutSlash) << std::endl;
-          if (route.pathPattern == withoutSlash)
-            return &route;
-        }
-      }
+        return MatchResult{&route, MatchError::None};
     }
-    return nullptr;
+
+    if (pathFound)
+      return MatchResult{nullptr, MatchError::MethodNotAllowed};
+
+    return MatchResult{nullptr, MatchError::NotFound};
   }
   const std::vector<Route> &getAllRoute() const { return routes_; }
 

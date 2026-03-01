@@ -12,21 +12,15 @@
 
 int main()
 {
-    Router router{"/pages"};
+    Router router{};
 
-    router.get("/", [](const HttpRequest &)
-               { return redirectTo("/index.html"); });
-    router.get("/cheval", [](const HttpRequest &)
-               { return redirectTo("/second.html"); });
-
-    Router auth{"/auth"};
-
-    auth.get("/", [](const HttpRequest &)
-             { return redirectTo("/auth.html"); });
+    router.post("/test", [](const HttpRequest &req)
+                {   
+                    std::cout << req.body << std::endl;
+                    return redirectTo("/index.html"); });
 
     ServerHandler server(PORT, WORKING_DIR);
     server.registerRoute(router);
-    server.registerRoute(auth);
     if (server.start())
     {
         return 0;

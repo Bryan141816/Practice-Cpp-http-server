@@ -74,19 +74,13 @@ bool ServerHandler::start()
       continue;
     }
 
-    // Only allow GET
-    if (request.method != "GET")
-    {
-      sendResponse(clientSocket, respondMethodNotAllowed());
-      closesocket(clientSocket);
-      logger("405", request.path);
-      continue;
-    }
 
-    // Handle routing
     std::string path = request.path;
-    if (const Route *route = router.match(HttpMethod::GET, request.path))
+    HttpMethod method = parseMethod(request.method);
+    MatchResult result = router.match(method, request.path);
+    if (result.route)
     {
+      const Route *route = result.route;
       HttpResponse resp = route->handler(request);
       sendResponse(clientSocket, resp);
       closesocket(clientSocket);
@@ -94,6 +88,15 @@ bool ServerHandler::start()
       std::string stringStatus = httpstatus::toString(resp.status);
       logger(stringStatus, request.path);
       continue;
+    }
+    else if (result.error == MatchError::MethodNotAllowed)
+    {
+      {
+        sendResponse(clientSocket, respondMethodNotAllowed());
+        closesocket(clientSocket);
+        logger("405", request.path);
+        continue;
+      }
     }
 
     // Sanitize path
@@ -158,4 +161,16 @@ bool ServerHandler::recvUntilHeaders(SOCKET s, std::string &out)
 void ServerHandler::logger(std::string status, std::string &path)
 {
   std::cout << status << ": " << path << std::endl;
+}
+HttpMethod ServerHandler::parseMethod(std::string m)
+{
+  if (m == "GET")
+    return HttpMethod::GET;
+  if (m == "POST")
+    return HttpMethod::POST;
+  if (m == "PUT")
+    return HttpMethod::PUT;
+  if (m == "DELETE")
+    return HttpMethod::DELETE_;
+  return HttpMethod::UNKNOWN;
 }
