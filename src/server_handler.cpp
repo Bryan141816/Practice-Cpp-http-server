@@ -2,9 +2,9 @@
 
 ServerHandler::ServerHandler(int port, std::string dir)
     : port(port), workingDir(std::move(dir)) {}
-void ServerHandler::addRouter(Router router)
+void ServerHandler::registerRoute(Router router)
 {
-  this->router = router;
+  this->router.includeRouter(router);
 }
 bool ServerHandler::start()
 {
@@ -85,13 +85,12 @@ bool ServerHandler::start()
 
     // Handle routing
     std::string path = request.path;
-
-    if (const Router::Handler *h = router.matchGet(request.path))
+    if (const Route *route = router.match(HttpMethod::GET, request.path))
     {
-      HttpResponse resp = (*h)(request);
+      HttpResponse resp = route->handler(request);
       sendResponse(clientSocket, resp);
       closesocket(clientSocket);
-  
+
       std::string stringStatus = httpstatus::toString(resp.status);
       logger(stringStatus, request.path);
       continue;

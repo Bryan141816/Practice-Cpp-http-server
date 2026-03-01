@@ -12,19 +12,27 @@
 
 int main()
 {
-    Router router {"/pages"};
+    Router router{"/pages"};
 
     router.get("/", [](const HttpRequest &)
                { return redirectTo("/index.html"); });
     router.get("/cheval", [](const HttpRequest &)
                { return redirectTo("/second.html"); });
 
+    Router auth{"/auth"};
+
+    auth.get("/", [](const HttpRequest &)
+             { return redirectTo("/auth.html"); });
+
     ServerHandler server(PORT, WORKING_DIR);
-    server.addRouter(router);
-    if(server.start()){
+    server.registerRoute(router);
+    server.registerRoute(auth);
+    if (server.start())
+    {
         return 0;
     }
-    else{
+    else
+    {
         return 1;
     }
 }

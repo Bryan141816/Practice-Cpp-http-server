@@ -7,20 +7,20 @@
 #include "mimetype_utils.h"
 #include "url_utils.h"
 #include "file_handler.h"
-#include "router.h"
+#include "global_router.h"
 
-class Router;
+class GlobalRouter;
 
 class ServerHandler {
 public:
   ServerHandler(int port, std::string dir);
-  void addRouter(Router router);
+  void registerRoute(Router router);
   bool start();
 
 private:
   int port;
   std::string workingDir;
-  Router router;
+  GlobalRouter router;
 
   static constexpr int bufferSize = 4096;
   static bool recvUntilHeaders(SOCKET s, std::string &out);

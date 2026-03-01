@@ -12,6 +12,7 @@ add_executable(Server
             src/http_response.cpp
             src/file_handler.cpp
             src/server_handler.cpp
+            src/global_router.cpp
 )
 
 target_link_libraries(Server PRIVATE Ws2_32)
