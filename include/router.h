@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <functional>
 #include <iostream>
+#include <dynamic_router_handler.h>
 
 struct HttpRequest;
 struct HttpResponse;
@@ -17,11 +18,17 @@ enum class HttpMethod
   DELETE_,
   UNKNOWN,
 };
+enum class RouteType
+{
+  STATIC,
+  DYNAMIC,
+};
 
 struct Route
 {
   HttpMethod method;
   std::string pathPattern;
+  RouteType routeType;
   std::function<HttpResponse(const HttpRequest &)> handler;
 };
 
@@ -36,6 +43,7 @@ struct MatchResult
 {
   const Route *route = nullptr;
   MatchError error = MatchError::NotFound;
+  dynamic_route::ParamsMap parameters = {};
 };
 
 class Router
@@ -47,8 +55,15 @@ public:
 
   void addRoute(HttpMethod method, const std::string &path, Handler handler)
   {
+    RouteType routeType = RouteType::STATIC;
+
+    if (dynamic_route::isDynamicRoutePattern(path))
+    {
+      routeType = RouteType::DYNAMIC;
+    }
     routes_.push_back({method,
                        prefix_ + path,
+                       routeType,
                        std::move(handler)});
   }
 
@@ -87,19 +102,28 @@ public:
 
     for (const auto &route : routes_)
     {
+      if (route.routeType == RouteType::DYNAMIC)
+      {
+        auto parsed = dynamic_route::matchAndParse(route.pathPattern, path);
+        if (!parsed)
+        {
+          continue;
+        }
+        return MatchResult{&route, MatchError::None, std::move(*parsed)};
+      }
       if (!pathMatches(route.pathPattern, path))
         continue;
 
       pathFound = true;
 
       if (route.method == method)
-        return MatchResult{&route, MatchError::None};
+        return MatchResult{&route, MatchError::None, {}};
     }
 
     if (pathFound)
-      return MatchResult{nullptr, MatchError::MethodNotAllowed};
+      return MatchResult{nullptr, MatchError::MethodNotAllowed, {}};
 
-    return MatchResult{nullptr, MatchError::NotFound};
+    return MatchResult{nullptr, MatchError::NotFound, {}};
   }
   const std::vector<Route> &getAllRoute() const { return routes_; }
 

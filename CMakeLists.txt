@@ -13,6 +13,7 @@ add_executable(Server
             src/file_handler.cpp
             src/server_handler.cpp
             src/global_router.cpp
+            src/dynamic_router_handler.cpp
 )
 
 target_link_libraries(Server PRIVATE Ws2_32)

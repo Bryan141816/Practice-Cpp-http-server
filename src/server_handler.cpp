@@ -74,13 +74,21 @@ bool ServerHandler::start()
       continue;
     }
 
-
     std::string path = request.path;
     HttpMethod method = parseMethod(request.method);
     MatchResult result = router.match(method, request.path);
     if (result.route)
     {
       const Route *route = result.route;
+      if (route->routeType == RouteType::DYNAMIC && result.parameters.size() != 0)
+      {
+        for (const auto &[k, v] : result.parameters)
+        {
+          std::cout << k << " = ";
+          std::visit([](const auto &value)
+                     { std::cout << value; }, v);
+        }
+      }
       HttpResponse resp = route->handler(request);
       sendResponse(clientSocket, resp);
       closesocket(clientSocket);

@@ -18,6 +18,10 @@ int main()
                 {   
                     std::cout << req.body << std::endl;
                     return redirectTo("/index.html"); });
+    router.get("/test/<int:id>", [](const HttpRequest &req)
+                {   
+                    std::cout << req.body << std::endl;
+                    return redirectTo("/index.html"); });
 
     ServerHandler server(PORT, WORKING_DIR);
     server.registerRoute(router);
